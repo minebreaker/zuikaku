@@ -18,7 +18,7 @@ body {
 
 .container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, $cellSize);
+    grid-template-columns: repeat(auto-fit, minmax($cellSize, 1fr));
 
     /* https://developer.mozilla.org/ja/docs/Web/CSS/grid-auto-flow */
     grid-auto-flow: dense;

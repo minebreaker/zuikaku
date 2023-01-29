@@ -6,7 +6,9 @@ import template.{renderCell, renderCells, renderCss, renderHtml, renderJs}
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 
-import java.nio.file.{FileVisitOption, Files, Path}
+import java.io.IOException
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.{FileVisitOption, FileVisitResult, Files, Path, SimpleFileVisitor}
 import scala.util.matching.Regex
 
 object Main extends IOApp:
@@ -20,17 +22,10 @@ object Main extends IOApp:
 
 private def process(config: Config): IO[Unit] =
   import cats.syntax.parallel.*
-
   import scala.jdk.StreamConverters.*
 
   for
-    doesOutDirExist <- IO.blocking { Files.isDirectory(config.outRoot) }
-    _ <- IO.whenA(doesOutDirExist) {
-      for
-        isEmpty <- use(Files.list(config.outRoot)) { s => s.toScala(List).isEmpty }
-        _ <- IO.raiseUnless(isEmpty)(RuntimeException("Output directory is not empty!"))
-      yield ()
-    }
+    _ <- checkConditions(config)
 
     setting <- parse.parse[Setting](config.inRoot.resolve("setting.yaml"))
 
@@ -59,6 +54,40 @@ private def process(config: Config): IO[Unit] =
           IO.raiseError(RuntimeException(s"Unknown file type: $unknown"))
     }
   yield ()
+
+private def checkConditions(config: Config): IO[Unit] =
+  import scala.jdk.StreamConverters.*
+
+  if config.clean then
+    for
+      _ <- IO.println("cleaning output directory")
+      _ <- IO.blocking {
+        Files.walkFileTree(
+          config.outRoot,
+          new SimpleFileVisitor[Path] {
+            override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult =
+              val r = super.visitFile(file, attrs)
+              Files.deleteIfExists(file)
+              r
+
+            override def postVisitDirectory(dir: Path, exc: IOException): FileVisitResult =
+              val r = super.postVisitDirectory(dir, exc)
+              Files.deleteIfExists(dir)
+              r
+          }
+        )
+      }
+    yield ()
+  else
+    for
+      doesOutDirExist <- IO.blocking { Files.isDirectory(config.outRoot) }
+      _ <- IO.whenA(doesOutDirExist) {
+        for
+          isEmpty <- use(Files.list(config.outRoot)) { s => s.toScala(List).isEmpty }
+          _ <- IO.raiseUnless(isEmpty)(RuntimeException("Output directory is not empty!"))
+        yield ()
+      }
+    yield ()
 
 private def processCell(config: Config, setting: Setting, processingDir: Path, page: CellPage): IO[Unit] =
   import cats.syntax.option.*

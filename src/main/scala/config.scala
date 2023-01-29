@@ -9,12 +9,14 @@ import scala.util.Try
 
 case class Config(
     inRoot: Path,
-    outRoot: Path
+    outRoot: Path,
+    clean: Boolean
 )
 
 private val options = Options()
-  .addRequiredOption("i", "in", true, "Input root directory")
-  .addRequiredOption("o", "out", true, "Output root directory")
+  .addRequiredOption("i", "in", true, "Input root directory.")
+  .addRequiredOption("o", "out", true, "Output root directory.")
+  .addRequiredOption(null, "clean", false, "Clean the output directory.")
 
 def parseArgs(args: Array[String]): IO[Config] =
   val parser = DefaultParser()
@@ -25,12 +27,17 @@ def parseArgs(args: Array[String]): IO[Config] =
     }
 
     inRootStr = result.getOptionValue("in")
-    outRootStr = result.getOptionValue("out")
     inRoot <- strToDir(inRootStr, requireExists = true)
+    
+    outRootStr = result.getOptionValue("out")
     outRoot <- strToDir(outRootStr)
+    
+    clean = result.hasOption("clean")
+    
   yield Config(
     inRoot,
-    outRoot
+    outRoot,
+    clean
   )
 
 private def strToDir(s: String, requireExists: Boolean = false): IO[Path] =

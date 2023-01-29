@@ -3,9 +3,24 @@ package parse
 
 import cats.syntax.functor.*
 import io.circe.Decoder
-import io.circe.generic.semiauto.deriveDecoder
+import io.circe.generic.semiauto.{deriveCodec, deriveDecoder}
 
 type I18nText = Map[String, String]
+
+case class Setting(
+    siteTitle: I18nText,
+    style: Option[Setting.Style]
+)
+
+object Setting:
+  case class Style(
+      raw: Option[String]
+  )
+
+  object Style:
+    implicit val decoder: Decoder[Style] = deriveDecoder
+
+  implicit val decoder: Decoder[Setting] = deriveDecoder
 
 sealed trait Page
 

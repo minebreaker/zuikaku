@@ -1,20 +1,16 @@
 package rip.deadcode.zuikaku
 package template
 
-def renderCss(): String = renderCss(
-  backgroundColor = "lightblue",
-  cellSize = "200px",
-  cellBackgroundColor = "cyan",
-  animationDuration = "0.1s"
-)
-
 def renderCss(
-    backgroundColor: String,
-    cellSize: String,
-    cellBackgroundColor: String,
-    animationDuration: String
+    backgroundColor: String ="lightblue",
+    cellSize: String = "200px",
+    cellBackgroundColor: String = "cyan",
+    animationDuration: String = "0.1s",
+    raw: Option[String] = None
 ): String =
   s"""
+
+${ raw.getOrElse("") }
 
 body {
     background-color: $backgroundColor;
@@ -102,6 +98,7 @@ a.cell-link {
     width: 100%;
     display: inline-block;
 
+    color: inherit;
     text-decoration: none;
 }
 }

@@ -1,0 +1,12 @@
+siteTitle:
+    default: Zuikaku
+    ja: ズイカク
+style:
+    raw: |
+        body {
+            font-family: "Meiryo UI", "Noto Sans", "Helvetica Neue", Helvetica, system-ui, -apple-system, "Segoe UI", san-serif;
+        }
+        
+        p {
+            font-size: 18px;
+        }

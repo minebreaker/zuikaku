@@ -1,11 +1,10 @@
 package rip.deadcode.zuikaku
 
-import parse.Page
+import parse.{Page, Setting}
 import parse.Page.{CellPage, TextPage}
 import template.{renderCell, renderCells, renderCss, renderHtml, renderJs}
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
-import cats.syntax.traverse.*
 
 import java.nio.file.{FileVisitOption, Files, Path}
 import scala.util.matching.Regex
@@ -19,6 +18,8 @@ object Main extends IOApp:
     yield ExitCode.Success
 
 private def process(config: Config): IO[Unit] =
+  import cats.syntax.parallel.*
+
   import scala.jdk.StreamConverters.*
 
   for
@@ -29,25 +30,27 @@ private def process(config: Config): IO[Unit] =
       }
     }
 
+    setting <- parse.parse[Setting](config.inRoot.resolve("setting.yaml"))
+
     paths <- Resource.fromAutoCloseable(IO.blocking(Files.walk(config.inRoot))).use { s =>
       IO.blocking {
         s.toScala(List)
           .filter(f => Files.isRegularFile(f))
       }
     }
-    _ <- paths.traverse { path =>
+    _ <- paths.parTraverse { path =>
       val fileName = path.getFileName.toString
       val mdPat = "^.*\\.md$".r
       val photoPat = "^.*\\.(jpg|jpeg|png|bmp|JPG|JPEG|PNG|BMP)$".r
       fileName match
         case "index.yaml" =>
           for
-            definition <- parse.parsePage(path)
+            definition <- parse.parse[Page](path)
             _ <- definition match
-              case d: CellPage => processCell(config, path.getParent, d)
-              case d: TextPage => processTextPage(config, path.getParent, d)
+              case d: CellPage => processCell(config, setting, path.getParent, d)
+              case d: TextPage => processTextPage(config, setting, path.getParent, d)
           yield ()
-        case mdPat() =>
+        case mdPat() | "setting.yaml" =>
           // just ignore
           IO.unit
         case photoPat(_) =>
@@ -57,14 +60,20 @@ private def process(config: Config): IO[Unit] =
     }
   yield ()
 
-private def processCell(config: Config, processingDir: Path, page: CellPage): IO[Unit] =
+private def processCell(config: Config, setting: Setting, processingDir: Path, page: CellPage): IO[Unit] =
+  import cats.syntax.option.*
+  import cats.syntax.traverse.*
+
   for _ <- page.title.toList.traverse { case (lang, title) =>
       for
 
         renderedCells <- renderCells(page.cells, lang)
+
+        siteTitle <- setting.siteTitle.get(lang).liftTo[IO](???)
+
         renderedHtml = renderHtml(
           lang,
-          title,
+          s"$title - $siteTitle",
           renderedCells
         )
 
@@ -74,7 +83,7 @@ private def processCell(config: Config, processingDir: Path, page: CellPage): IO
         _ <- write(outHtmlPath, renderedHtml)
 
         _ <- IO.whenA(lang == "default") {
-          processIndexAssets(outDir)
+          processIndexAssets(setting, outDir)
         }
       yield ()
     }
@@ -82,8 +91,9 @@ private def processCell(config: Config, processingDir: Path, page: CellPage): IO
 
 private val markdownParser = com.vladsch.flexmark.parser.Parser.builder().build()
 private val htmlRenderer = com.vladsch.flexmark.html.HtmlRenderer.builder().build()
-private def processTextPage(config: Config, processingDir: Path, page: TextPage): IO[Unit] =
+private def processTextPage(config: Config, setting: Setting, processingDir: Path, page: TextPage): IO[Unit] =
   import cats.syntax.option.*
+  import cats.syntax.traverse.*
 
   page.text.src.toList.traverse { case (lang, src) =>
     val markdownFile = processingDir.resolve(src)
@@ -105,13 +115,13 @@ private def processTextPage(config: Config, processingDir: Path, page: TextPage)
       _ <- write(outHtmlPath, renderedHtml)
 
       _ <- IO.whenA(lang == "default") {
-        processIndexAssets(outDir)
+        processIndexAssets(setting, outDir)
       }
     yield ()
   }.void
 
-private def processIndexAssets(outDir: Path): IO[Unit] =
-  val renderedCss = renderCss()
+private def processIndexAssets(setting: Setting, outDir: Path): IO[Unit] =
+  val renderedCss = renderCss(raw = setting.style.flatMap(_.raw))
   val outCssPath = outDir.resolve("index.css")
   for
     _ <- write(outCssPath, renderedCss)
@@ -130,8 +140,10 @@ private def getOutDir(config: Config, processingDir: Path, lang: String = "defau
     config.outRoot.resolve("i18n").resolve(lang).resolve(relative)
 
 private def processPhoto(config: Config, target: Path): IO[Unit] =
+  import cats.syntax.parallel.*
+
   val outDir = getOutDir(config, target.getParent)
-  for
-    _ <- removeGeotag(target, outDir)
-    _ <- generateThumbnail(target, outDir, 200)
-  yield ()
+  Seq(
+    removeGeotag(target, outDir),
+    generateThumbnail(target, outDir, 200)
+  ).parSequence.void

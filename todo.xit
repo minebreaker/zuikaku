@@ -1,8 +1,7 @@
 Features
 [ ] img alt
 [ ] nth cell color
-
+[ ] per-page css/js
+[ ] logging
 
 Bugs
-[ ] Js not working in markdown
-[ ] unintended modal opening for non-image cells

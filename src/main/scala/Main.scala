@@ -1,7 +1,7 @@
 package rip.deadcode.zuikaku
 
-import parse.{Page, Setting}
 import parse.Page.{CellPage, TextPage}
+import parse.{Page, Setting}
 import template.{renderCell, renderCells, renderCss, renderHtml, renderJs}
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
@@ -15,6 +15,7 @@ object Main extends IOApp:
       config <- parseArgs(args.toArray)
       _ <- IO.println(config)
       _ <- process(config)
+      _ <- IO.println("finished.")
     yield ExitCode.Success
 
 private def process(config: Config): IO[Unit] =
@@ -25,18 +26,17 @@ private def process(config: Config): IO[Unit] =
   for
     doesOutDirExist <- IO.blocking { Files.isDirectory(config.outRoot) }
     _ <- IO.whenA(doesOutDirExist) {
-      Resource.fromAutoCloseable(IO.blocking(Files.list(config.outRoot))).use { s =>
-        IO.raiseUnless(s.toScala(List).isEmpty)(RuntimeException("Output directory is not empty!"))
-      }
+      for
+        isEmpty <- use(Files.list(config.outRoot)) { s => s.toScala(List).isEmpty }
+        _ <- IO.raiseUnless(isEmpty)(RuntimeException("Output directory is not empty!"))
+      yield ()
     }
 
     setting <- parse.parse[Setting](config.inRoot.resolve("setting.yaml"))
 
-    paths <- Resource.fromAutoCloseable(IO.blocking(Files.walk(config.inRoot))).use { s =>
-      IO.blocking {
-        s.toScala(List)
-          .filter(f => Files.isRegularFile(f))
-      }
+    paths <- use(Files.walk(config.inRoot)) { s =>
+      s.toScala(List)
+        .filter(f => Files.isRegularFile(f))
     }
     _ <- paths.parTraverse { path =>
       val fileName = path.getFileName.toString
@@ -50,11 +50,11 @@ private def process(config: Config): IO[Unit] =
               case d: CellPage => processCell(config, setting, path.getParent, d)
               case d: TextPage => processTextPage(config, setting, path.getParent, d)
           yield ()
+        case photoPat(_) =>
+          processPhoto(config, path)
         case mdPat() | "setting.yaml" =>
           // just ignore
           IO.unit
-        case photoPat(_) =>
-          processPhoto(config, path)
         case unknown =>
           IO.raiseError(RuntimeException(s"Unknown file type: $unknown"))
     }
@@ -66,7 +66,6 @@ private def processCell(config: Config, setting: Setting, processingDir: Path, p
 
   for _ <- page.title.toList.traverse { case (lang, title) =>
       for
-
         renderedCells <- renderCells(page.cells, lang)
 
         siteTitle <- setting.siteTitle.get(lang).liftTo[IO](???)
@@ -98,7 +97,7 @@ private def processTextPage(config: Config, setting: Setting, processingDir: Pat
   page.text.src.toList.traverse { case (lang, src) =>
     val markdownFile = processingDir.resolve(src)
     for
-      node <- use(markdownFile) { r => markdownParser.parseReader(r) }
+      node <- useReader(markdownFile) { r => markdownParser.parseReader(r) }
       renderedMarkdown = htmlRenderer.render(node)
 
       title <- page.title
@@ -141,9 +140,12 @@ private def getOutDir(config: Config, processingDir: Path, lang: String = "defau
 
 private def processPhoto(config: Config, target: Path): IO[Unit] =
   import cats.syntax.parallel.*
+  import cats.syntax.traverse.*
 
   val outDir = getOutDir(config, target.getParent)
-  Seq(
-    removeGeotag(target, outDir),
-    generateThumbnail(target, outDir, 200)
-  ).parSequence.void
+
+  for _ <- Seq(
+      removeGeotag(target, outDir),
+      generateThumbnail(target, outDir, 200)
+    ).parSequence
+  yield ()

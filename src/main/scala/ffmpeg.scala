@@ -24,6 +24,7 @@ def generateThumbnail(inFile: Path, outDir: Path, size: Int): IO[Unit] =
       args
     )
     (code, _, err) = result
+    _ <- IO.println(s"ffmpeg $code")
     _ <- IO.raiseUnless(code == 0)(RuntimeException(s"ffmpeg has exited with status code $code\nstderr:\n$err"))
   yield ()
 

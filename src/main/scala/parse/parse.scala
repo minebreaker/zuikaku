@@ -14,7 +14,7 @@ def parse[T](input: Path)(implicit decoder: Decoder[T]): IO[T] =
   import io.circe.yaml.v12.parser
 
   for
-    jsonResult <- use(input) { r => parser.parse(r) }
+    jsonResult <- useReader(input) { r => parser.parse(r) }
     json <- jsonResult.liftTo[IO]
     definition <- json.as[T].liftTo[IO]
   yield definition

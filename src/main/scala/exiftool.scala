@@ -23,5 +23,6 @@ def removeGeotag(inFile: Path, outDir: Path): IO[Unit] =
       args
     )
     (code, _, err) = result
+    _ <- IO.println(s"exiftool $code")
     _ <- IO.raiseUnless(code == 0)(RuntimeException(s"ffmpeg has exited with status code $code\nstderr:\n$err"))
   yield ()

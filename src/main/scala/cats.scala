@@ -8,11 +8,16 @@ import java.nio.file.{FileVisitOption, Files, OpenOption, Path, StandardOpenOpti
 import scala.concurrent.Future
 import scala.sys.process.{BasicIO, Process, ProcessImplicits, ProcessLogger}
 
-def use[T](path: Path)(f: BufferedReader => T): IO[T] =
-  Resource.fromAutoCloseable(IO.blocking(Files.newBufferedReader(path, StandardCharsets.UTF_8))).use { r =>
+def use[T, R <: AutoCloseable](f: => R)(g: R => T): IO[T] =
+  Resource.fromAutoCloseable(IO.blocking(f)).use { r =>
     IO.blocking {
-      f(r)
+      g(r)
     }
+  }
+
+def useReader[T](path: Path)(g: BufferedReader => T): IO[T] =
+  use(Files.newBufferedReader(path, StandardCharsets.UTF_8)) { r =>
+    g(r)
   }
 
 def write(path: Path, s: String): IO[Unit] =

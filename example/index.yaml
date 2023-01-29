@@ -1,0 +1,34 @@
+title:
+    default: An example website
+    ja: ウェブサイトの例
+cells:
+    -   type: text
+        tag: h1
+        column: 2
+        text:
+            default: Example
+            ja: 動作例
+    -   type: text
+        column: 2
+        text:
+            default:
+                This is an example website that shows how the generator works.
+            ja:
+                これは、ジェネレーターがどのように動作するのかを示すサンプルウェブサイトです。
+    -   type: image
+        src: ./image1.jpg
+        link: ./dir
+    -   type: image
+        src: ./image2.jpg
+    -   type: image
+        src: ./image3.jpg
+        column: 2
+        row: 2
+    -   type: text
+        row: 1
+        text:
+            default:
+                Click here
+            ja:
+                クリック
+        link: ./dir

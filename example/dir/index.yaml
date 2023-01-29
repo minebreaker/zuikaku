@@ -1,0 +1,7 @@
+title:
+    default: A Markdown example
+    ja: マークダウンの例
+text:
+    src:
+        default: index.md
+        ja: index.ja.md

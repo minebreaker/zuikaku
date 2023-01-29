@@ -14,8 +14,26 @@ case class Setting(
 
 object Setting:
   case class Style(
+      backgroundColor: Option[String],
+      fontFamily: Option[String],
+      fontSize: Option[String],
+      cellSize: Option[String],
+      cellBackgroundColor: Option[String],
+      cellBackgroundColorSecondary: Option[String],
+      animationDuration: Option[String],
       raw: Option[String]
-  )
+  ):
+    def fallback(fallback: Style): Style =
+      Style(
+        backgroundColor,
+        fontFamily,
+        fontSize,
+        cellSize,
+        cellBackgroundColor,
+        cellBackgroundColorSecondary,
+        animationDuration,
+        raw
+      )
 
   object Style:
     implicit val decoder: Decoder[Style] = deriveDecoder

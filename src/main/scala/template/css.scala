@@ -1,19 +1,64 @@
 package rip.deadcode.zuikaku
 package template
 
-def renderCss(
-    backgroundColor: String ="lightblue",
-    cellSize: String = "200px",
-    cellBackgroundColor: String = "cyan",
-    animationDuration: String = "0.1s",
+import parse.Setting.Style
+
+case class StyleProps(
+    backgroundColor: String,
+    fontFamily: String,
+    fontSize: String,
+    cellSize: String,
+    cellBackgroundColor: String,
+    cellBackgroundColorSecondary: String,
+    animationDuration: String,
     raw: Option[String] = None
-): String =
+)
+
+private val default = StyleProps(
+  backgroundColor = "lightblue",
+  fontFamily =
+    """"Meiryo UI", "Noto Sans", "Helvetica Neue", Helvetica, system-ui, -apple-system, "Segoe UI", san-serif""",
+  fontSize = "20px",
+  cellSize = "200px",
+  cellBackgroundColor = "cyan",
+  cellBackgroundColorSecondary = "lightcyan",
+  animationDuration = "0.1s",
+  raw = None
+)
+
+extension (self: Option[Style])
+  def toProps: StyleProps =
+    self match
+      case Some(config) =>
+        StyleProps(
+          backgroundColor = config.backgroundColor.getOrElse(default.backgroundColor),
+          fontFamily = config.fontFamily.getOrElse(default.fontFamily),
+          fontSize = config.fontSize.getOrElse(default.fontSize),
+          cellSize = config.cellSize.getOrElse(default.cellSize),
+          cellBackgroundColor = config.cellBackgroundColor.getOrElse(default.cellBackgroundColor),
+          cellBackgroundColorSecondary = config.cellBackgroundColorSecondary
+            .orElse(config.cellBackgroundColor)
+            .getOrElse(default.cellBackgroundColorSecondary),
+          animationDuration = config.animationDuration.getOrElse(default.animationDuration),
+          raw = config.raw
+        )
+      case None => default
+
+def renderCss(maybeProps: Option[Style]): String =
+  val props = maybeProps.toProps
+  import props.*
+
   s"""
 
-${ raw.getOrElse("") }
+${raw.getOrElse("")}
 
 body {
     background-color: $backgroundColor;
+    font-family: $fontFamily;
+}
+
+p {
+  font-size: $fontSize;
 }
 
 .container {
@@ -23,6 +68,10 @@ body {
     /* https://developer.mozilla.org/ja/docs/Web/CSS/grid-auto-flow */
     grid-auto-flow: dense;
     grid-auto-rows: $cellSize;
+}
+
+.container > *.cell:nth-child(2n) {
+    background-color: $cellBackgroundColorSecondary;
 }
 
 .cell {

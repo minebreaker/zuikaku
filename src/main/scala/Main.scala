@@ -149,7 +149,7 @@ private def processTextPage(config: Config, setting: Setting, processingDir: Pat
   }.void
 
 private def processIndexAssets(setting: Setting, outDir: Path): IO[Unit] =
-  val renderedCss = renderCss(raw = setting.style.flatMap(_.raw))
+  val renderedCss = renderCss(setting.style)
   val outCssPath = outDir.resolve("index.css")
   for
     _ <- write(outCssPath, renderedCss)

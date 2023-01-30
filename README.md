@@ -1,3 +1,3 @@
 # 瑞鶴 - Site generator
 
-License: MIT
+License: GPL3 or later

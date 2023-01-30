@@ -11,11 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   cellEl.forEach(e => {
     e.addEventListener("click", () => {
+      modalImageEl.src = e.querySelector("img").src;
+
       modalEl.style.display = "flex"  // when "block" causes scrollbar problem and "flex" fixes it. Not sure why.
       modalEl.style.top = window.pageYOffset + "px"
       modalEl.classList.remove("modal-closed")
-
-      modalImageEl.src = e.querySelector("img").src;
     })
   })
 

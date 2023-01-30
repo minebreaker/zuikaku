@@ -4,3 +4,5 @@
 /out
 /project/target
 /project/project/target
+
+/firebase-debug.log

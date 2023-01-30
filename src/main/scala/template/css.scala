@@ -93,6 +93,16 @@ h1, h2, h3, h4, h5, h6, p {
   box-shadow: $cellShadow;
 }
 
+.cell-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.cell-text > * {
+  /* Centered texts look like too low */
+  margin-bottom: 0.5em;
+}
+
 .cell-image:hover {
   animation: cell-image $animationDuration ease-in;
 }
@@ -158,10 +168,6 @@ h1, h2, h3, h4, h5, h6, p {
 }
 
 a.cell-link {
-  height: 100%;
-  width: 100%;
-  display: inline-block;
-
   color: inherit;
   text-decoration: none;
 }

@@ -65,7 +65,8 @@ def renderTextCell(cell: Cell.Text, lang: String): IO[String] =
     cell.column,
     s"""<$tag>
        |  $text
-       |</$tag>""".stripMargin
+       |</$tag>""".stripMargin,
+    Seq("cell-text")
   )
 
 def renderImage(cell: Cell.Image, lang: String): String =

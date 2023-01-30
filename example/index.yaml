@@ -11,10 +11,12 @@ cells:
     -   type: text
         column: 2
         text:
-            default:
+            default: |
                 This is an example website that shows how the generator works.
-            ja:
+                Line breaks are converted to br tags.
+            ja: |
                 これは、ジェネレーターがどのように動作するのかを示すサンプルウェブサイトです。
+                改行はbrタグに変換されます。
     -   type: image
         src: ./image1.jpg
         link: ./dir
@@ -28,7 +30,7 @@ cells:
         row: 1
         text:
             default:
-                Click here
+                Click here to see the markdown example
             ja:
-                クリック
+                クリックして、Markdownのサンプルを見る
         link: ./dir

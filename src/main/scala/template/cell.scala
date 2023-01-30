@@ -56,7 +56,9 @@ def renderTextCell(cell: Cell.Text, lang: String): IO[String] =
 
   val tag = cell.tag.getOrElse("p")
 
-  for text <- cell.text.get(lang).liftTo[IO](RuntimeException(???, ???))
+  for
+    originalText <- cell.text.get(lang).liftTo[IO](RuntimeException(???, ???))
+    text = originalText.replaceAll("\\n+", "<br/>")
   yield renderGeneralCell(
     cell.link,
     cell.row,
@@ -73,7 +75,7 @@ def renderImage(cell: Cell.Image, lang: String): String =
     cell.row,
     cell.column,
     s"""<picture>
-       |  <source srcset="${ if (useThumbnail) getThumbnailFileName(cell.src) else cell.src }">
+       |  <source srcset="${if (useThumbnail) getThumbnailFileName(cell.src) else cell.src}">
        |  <img src="${cell.src}" class="cell-image-image"></img>
        |</picture>""".stripMargin,
     additionalClasses = Seq(

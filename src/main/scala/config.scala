@@ -16,7 +16,7 @@ case class Config(
 private val options = Options()
   .addRequiredOption("i", "in", true, "Input root directory.")
   .addRequiredOption("o", "out", true, "Output root directory.")
-  .addRequiredOption(null, "clean", false, "Clean the output directory.")
+  .addOption(null, "clean", false, "Clean the output directory.")
 
 def parseArgs(args: Array[String]): IO[Config] =
   val parser = DefaultParser()

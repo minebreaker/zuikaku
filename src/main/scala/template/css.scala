@@ -53,106 +53,110 @@ def renderCss(maybeProps: Option[Style]): String =
 ${raw.getOrElse("")}
 
 body {
-    background-color: $backgroundColor;
-    font-family: $fontFamily;
+  background-color: $backgroundColor;
+  font-family: $fontFamily;
 }
 
 p {
   font-size: $fontSize;
 }
 
-.container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax($cellSize, 1fr));
+h1, h2, h3, h4, h5, h6, p {
+  margin: 0;
+  padding: 0.8rem;
+}
 
-    /* https://developer.mozilla.org/ja/docs/Web/CSS/grid-auto-flow */
-    grid-auto-flow: dense;
-    grid-auto-rows: $cellSize;
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax($cellSize, 1fr));
+
+  /* https://developer.mozilla.org/ja/docs/Web/CSS/grid-auto-flow */
+  grid-auto-flow: dense;
+  grid-auto-rows: $cellSize;
 }
 
 .container > *.cell:nth-child(2n) {
-    background-color: $cellBackgroundColorSecondary;
+  background-color: $cellBackgroundColorSecondary;
 }
 
 .cell {
-    background-color: $cellBackgroundColor;
+  background-color: $cellBackgroundColor;
 }
 
 .cell-image:hover {
-    animation: cell-image $animationDuration ease-in;
+  animation: cell-image $animationDuration ease-in;
 }
 
 @keyframes cell-image {
-    50% {
-        transform: rotate(4deg);
-    }
+  50% {
+    transform: rotate(4deg);
+  }
 }
 
 .cell-image-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .grid-column-2 {
-    grid-column: span 2;
+  grid-column: span 2;
 }
 .grid-column-3 {
-    grid-column: span 3;
+  grid-column: span 3;
 }
 .grid-row-2 {
-    grid-row: span 2;
+  grid-row: span 2;
 }
 .grid-row-3 {
-    grid-row: span 3;
+  grid-row: span 3;
 }
 
 
 .modal {
-    background-color: black;
+  background-color: black;
 
-    display: none;
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
+  display: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
 
-    animation: modal $animationDuration ease-in;
+  animation: modal $animationDuration ease-in;
 }
 
 .modal.modal-closed {
-    animation: modal-close $animationDuration ease-in;
+  animation: modal-close $animationDuration ease-in;
 }
 
 @keyframes modal {
-    from {
-        transform: scale(0);
-    }
+  from {
+    transform: scale(0);
+  }
 }
 
 @keyframes modal-close {
-    to {
-        transform: scale(0);
-    }
+  to {
+    transform: scale(0);
+  }
 }
 
 .modal-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 a.cell-link {
-    height: 100%;
-    width: 100%;
-    display: inline-block;
+  height: 100%;
+  width: 100%;
+  display: inline-block;
 
-    color: inherit;
-    text-decoration: none;
-}
+  color: inherit;
+  text-decoration: none;
 }
 
 a.cell-link:visited {
-    color: inherit;
+  color: inherit;
 }
 """.stripMargin

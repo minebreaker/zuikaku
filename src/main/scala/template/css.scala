@@ -7,9 +7,11 @@ case class StyleProps(
     backgroundColor: String,
     fontFamily: String,
     fontSize: String,
+    gridGap: String,
     cellSize: String,
     cellBackgroundColor: String,
     cellBackgroundColorSecondary: String,
+    cellShadow: String,
     animationDuration: String,
     raw: Option[String] = None
 )
@@ -19,9 +21,11 @@ private val default = StyleProps(
   fontFamily =
     """"Meiryo UI", "Noto Sans", "Helvetica Neue", Helvetica, system-ui, -apple-system, "Segoe UI", san-serif""",
   fontSize = "20px",
+  gridGap = "4px",
   cellSize = "200px",
   cellBackgroundColor = "cyan",
   cellBackgroundColorSecondary = "lightcyan",
+  cellShadow = "4px 4px 4px rgba(0,0,0,0.2)",
   animationDuration = "0.1s",
   raw = None
 )
@@ -34,11 +38,13 @@ extension (self: Option[Style])
           backgroundColor = config.backgroundColor.getOrElse(default.backgroundColor),
           fontFamily = config.fontFamily.getOrElse(default.fontFamily),
           fontSize = config.fontSize.getOrElse(default.fontSize),
+          gridGap = config.gridGap.getOrElse(default.gridGap),
           cellSize = config.cellSize.getOrElse(default.cellSize),
           cellBackgroundColor = config.cellBackgroundColor.getOrElse(default.cellBackgroundColor),
           cellBackgroundColorSecondary = config.cellBackgroundColorSecondary
             .orElse(config.cellBackgroundColor)
             .getOrElse(default.cellBackgroundColorSecondary),
+          cellShadow = config.cellShadow.getOrElse(default.cellShadow),
           animationDuration = config.animationDuration.getOrElse(default.animationDuration),
           raw = config.raw
         )
@@ -73,6 +79,9 @@ h1, h2, h3, h4, h5, h6, p {
   /* https://developer.mozilla.org/ja/docs/Web/CSS/grid-auto-flow */
   grid-auto-flow: dense;
   grid-auto-rows: $cellSize;
+
+  margin: $gridGap;
+  grid-gap: $gridGap;
 }
 
 .container > *.cell:nth-child(2n) {
@@ -81,6 +90,7 @@ h1, h2, h3, h4, h5, h6, p {
 
 .cell {
   background-color: $cellBackgroundColor;
+  box-shadow: $cellShadow;
 }
 
 .cell-image:hover {

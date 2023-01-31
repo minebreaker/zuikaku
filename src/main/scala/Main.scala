@@ -58,36 +58,36 @@ private def process(config: Config): IO[Unit] =
 private def checkConditions(config: Config): IO[Unit] =
   import scala.jdk.StreamConverters.*
 
-  if config.clean then
-    for
-      _ <- IO.println("cleaning output directory")
-      _ <- IO.blocking {
-        Files.walkFileTree(
-          config.outRoot,
-          new SimpleFileVisitor[Path] {
-            override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult =
-              val r = super.visitFile(file, attrs)
-              Files.deleteIfExists(file)
-              r
+  for
+    doesOutDirExist <- IO.blocking { Files.isDirectory(config.outRoot) }
+    _ <- IO.whenA(doesOutDirExist) {
+      if config.clean then
+        for
+          _ <- IO.println("cleaning output directory")
+          _ <- IO.blocking {
+            Files.walkFileTree(
+              config.outRoot,
+              new SimpleFileVisitor[Path] {
+                override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult =
+                  val r = super.visitFile(file, attrs)
+                  Files.deleteIfExists(file)
+                  r
 
-            override def postVisitDirectory(dir: Path, exc: IOException): FileVisitResult =
-              val r = super.postVisitDirectory(dir, exc)
-              Files.deleteIfExists(dir)
-              r
+                override def postVisitDirectory(dir: Path, exc: IOException): FileVisitResult =
+                  val r = super.postVisitDirectory(dir, exc)
+                  Files.deleteIfExists(dir)
+                  r
+              }
+            )
           }
-        )
-      }
-    yield ()
-  else
-    for
-      doesOutDirExist <- IO.blocking { Files.isDirectory(config.outRoot) }
-      _ <- IO.whenA(doesOutDirExist) {
+        yield ()
+      else
         for
           isEmpty <- use(Files.list(config.outRoot)) { s => s.toScala(List).isEmpty }
           _ <- IO.raiseUnless(isEmpty)(RuntimeException("Output directory is not empty!"))
         yield ()
-      }
-    yield ()
+    }
+  yield ()
 
 private def processCell(config: Config, setting: Setting, processingDir: Path, page: CellPage): IO[Unit] =
   import cats.syntax.option.*

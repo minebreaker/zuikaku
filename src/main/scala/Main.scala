@@ -22,6 +22,7 @@ object Main extends IOApp:
 
 private def process(config: Config): IO[Unit] =
   import cats.syntax.parallel.*
+
   import scala.jdk.StreamConverters.*
 
   for

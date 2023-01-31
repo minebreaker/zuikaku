@@ -93,12 +93,12 @@ h1, h2, h3, h4, h5, h6, p {
   box-shadow: $cellShadow;
 }
 
-.cell-text {
+.cell-text, .cell-text > a {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.cell-text > * {
+.cell-text > *:not(a), .cell-text > a > * {
   /* Centered texts look like too low */
   margin-bottom: 0.5em;
 }
@@ -174,6 +174,9 @@ h1, h2, h3, h4, h5, h6, p {
 }
 
 a.cell-link {
+  height: 100%;
+  width: 100%;
+
   color: inherit;
   text-decoration: none;
 }

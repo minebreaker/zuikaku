@@ -1,8 +1,9 @@
-/.idea
-/.bsp
-/target
-/out
-/project/target
-/project/project/target
+.idea
+.bsp
+target
+out
+project/target
+project/project/target
 
-/firebase-debug.log
+firebase-debug.log
+.firebase

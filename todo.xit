@@ -11,4 +11,3 @@ Features?
 Bugs
 [ ] in the modal, a previous image is shown in a short period
 [ ] issues with parallelism - ffmpeg blocks forever when using parSequence
-[ ] text link click location

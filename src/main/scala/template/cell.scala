@@ -57,7 +57,9 @@ def renderTextCell(cell: Cell.Text, lang: String): IO[String] =
   val tag = cell.tag.getOrElse("p")
 
   for
-    originalText <- cell.text.get(lang).liftTo[IO](RuntimeException(???, ???))
+    originalText <- cell.text
+      .get(lang)
+      .liftTo[IO](RuntimeException(s"could not find the cell text for lang $lang. text=${cell.text("default")}"))
     text = originalText.replaceAll("\\n+", "<br/>")
   yield renderGeneralCell(
     cell.link,

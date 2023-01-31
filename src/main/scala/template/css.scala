@@ -125,10 +125,16 @@ h1, h2, h3, h4, h5, h6, p {
 .grid-column-3 {
   grid-column: span 3;
 }
+.grid-column-4 {
+  grid-column: span 3;
+}
 .grid-row-2 {
   grid-row: span 2;
 }
 .grid-row-3 {
+  grid-row: span 3;
+}
+.grid-row-4 {
   grid-row: span 3;
 }
 

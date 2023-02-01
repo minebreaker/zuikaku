@@ -145,8 +145,8 @@ h1, h2, h3, h4, h5, h6, p {
   display: none;
   position: absolute;
   top: 0;
-  width: 100%;
-  height: 100%;
+  width: 100dvw;
+  height: 100dvh;
 
   animation: modal $animationDuration ease-in;
 }

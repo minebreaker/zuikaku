@@ -22,7 +22,7 @@ def renderCell(cell: Cell, lang: String): IO[String] =
   cell match
     case c: Cell.Text  => renderTextCell(c, lang)
     case c: Cell.Image => IO.pure(renderImage(c, lang))
-    case c: Cell.Raw   => ???
+    case c: Cell.Raw   => IO.pure(renderRaw(c, lang))
 
 private def renderGeneralCell(
     link: Option[String],
@@ -85,4 +85,15 @@ def renderImage(cell: Cell.Image, lang: String): String =
       Some("cell-image"),
       cell.link.map(_ => "cell-image-link")
     ).flatten
+  )
+
+def renderRaw(cell: Cell.Raw, lang: String): String =
+  renderGeneralCell(
+    None,
+    None,
+    None,
+    cell.content
+      .get(lang)
+      .orElse(cell.content.get("default"))
+      .getOrElse(throw RuntimeException(s"could not find content for lang $lang nor default."))
   )

@@ -34,7 +34,8 @@ private def process(config: Config): IO[Unit] =
       s.toScala(List)
         .filter(f => Files.isRegularFile(f))
     }
-    _ <- paths.parTraverse { path =>
+    // Directory under bak is not processed; this impl is dumb but do the job
+    _ <- paths.filter(!_.toString.contains("bak")).parTraverse { path =>
       val fileName = path.getFileName.toString
       val mdPat = "^.*\\.md$".r
       val photoPat = "^.*\\.(jpg|jpeg|png|bmp|JPG|JPEG|PNG|BMP)$".r

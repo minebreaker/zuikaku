@@ -79,7 +79,7 @@ def renderImage(cell: Cell.Image, lang: String): String =
     cell.column,
     s"""<picture>
        |  <source srcset="${if (useThumbnail) getThumbnailFileName(cell.src) else cell.src}">
-       |  <img src="${cell.src}" class="cell-image-image"></img>
+       |  <img src="${cell.src}" class="cell-image-image" decoding="async"></img>
        |</picture>""".stripMargin,
     additionalClasses = Seq(
       Some("cell-image"),

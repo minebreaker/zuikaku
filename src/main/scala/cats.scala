@@ -26,8 +26,18 @@ def write(path: Path, s: String): IO[Unit] =
     Files.write(path, s.getBytes(StandardCharsets.UTF_8))
   }
 
+private def retry[A](io: IO[A], times: Int): IO[A] =
+  import scala.concurrent.duration.*
+  io.handleErrorWith { e =>
+    if times > 0 then
+      IO.println(s"Exception occurred. Retrying(${times - 1})...") *>
+        IO.sleep(1.seconds) *>
+        retry(io, times - 1)
+    else IO.raiseError(RuntimeException("Retry threshold exceeded", e))
+  }
+
 def execute(commands: Seq[String]): IO[(Int, String, String)] =
-  IO.blocking {
+  val f = IO.blocking {
     val pb = Process(commands)
 
     val stdout = StringBuilder()
@@ -37,3 +47,4 @@ def execute(commands: Seq[String]): IO[(Int, String, String)] =
 
     (code, stdout.toString(), stderr.toString())
   }
+  retry(f, 3)
